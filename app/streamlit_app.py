@@ -78,42 +78,4 @@ if query:
     st.subheader("📌 Answer")
     st.write(answer)
 
-# import streamlit as st
-# from ingestion.run_ingestion import ingest
-# from processing.chunking import chunk_documents
-# from processing.embeddings import embed_chunks
-# from retrieval.vector_store import build_faiss_index
-# from retrieval.retriever import retrieve
-# from qa.qa_chain import generate_answer
-# from qa.llm_qa_chain import generate_llm_answer
 
-# st.title("📄 LLaMA-3 Powered Manual RAG")
-
-# uploaded = st.file_uploader("Upload PDF", type=["pdf"])
-
-# if uploaded:
-#     with open("temp.pdf", "wb") as f:
-#         f.write(uploaded.read())
-
-#     docs = ingest("temp.pdf")
-#     chunks = chunk_documents(docs)
-#     embeddings = embed_chunks(chunks)
-#     index = build_faiss_index(embeddings)
-
-#     mode = st.radio(
-#         "Answer Mode",
-#         ["Manual (Extractive)", "LLM (LLaMA-3)"]
-#     )
-
-#     query = st.text_input("Ask a question", key="query")
-
-#     if query:
-#         results = retrieve(query, index, chunks)
-
-#         if mode == "Manual (Extractive)":
-#             answer = generate_answer(query, results)
-#         else:
-#             answer = generate_llm_answer(query, results)
-
-#         st.subheader("📌 Answer")
-#         st.write(answer)
