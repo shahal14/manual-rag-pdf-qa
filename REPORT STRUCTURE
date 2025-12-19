@@ -1,0 +1,109 @@
+Multi-Modal Retrieval-Augmented Generation (RAG) System
+1. Introduction
+This project implements a Manual Retrieval-Augmented Generation (RAG) system that allows users to upload PDF documents and ask questions grounded strictly in the document’s content. Unlike framework-based solutions (LangChain/LlamaIndex), this system is built from scratch, providing full transparency, control, and explainability over each pipeline stage.
+The system supports large real-world documents, performs semantic retrieval using vector embeddings, and produces citation-backed answers with page-level traceability.
+2. System Architecture Overview
+The system follows a modular, end-to-end RAG pipeline:
+PDF Upload
+↓
+Multi-Modal Ingestion
+↓
+Chunking
+↓
+Embeddings
+↓
+FAISS Vector Index
+↓
+Semantic Retrieval
+↓
+Answer Generation + Citations
+Each stage is implemented manually without relying on RAG orchestration frameworks.
+3. Data Ingestion
+3.1 PDF Upload
+Users upload PDF documents through a Streamlit interface. The file is temporarily saved and passed to the ingestion pipeline.
+3.2 Text Extraction
+•	Implemented using PyMuPDF (fitz)
+•	Extracts page-level text
+•	Preserves metadata such as page numbers
+3.3 Table Extraction
+•	Implemented using Camelot
+•	Tables are converted to structured text
+•	Gracefully skipped if extraction fails
+3.4 OCR (Optional)
+OCR was designed as an optional module to avoid mandatory system-level dependencies. When unavailable, the system skips OCR while continuing text and table ingestion.
+Design Choice: OCR was intentionally made optional to ensure robustness and cross-platform compatibility
+4. Chunking Strategy
+Extracted content is chunked to optimize semantic retrieval:
+•	Text is split into ~600-character chunks
+•	Tables remain intact as single chunks
+•	Each chunk retains:
+o	Content
+o	Type (text/table)
+o	Page number
+This balances semantic coherence with retrieval accuracy.
+5. Embedding & Vector Indexing
+5.1 Embeddings
+•	Model: all-MiniLM-L6-v2 (SentenceTransformers)
+•	Each chunk is converted into a dense vector representation
+5.2 Vector Store
+•	FAISS (IndexFlatL2) is used for similarity search
+•	Enables fast top-K nearest-neighbor retrieval
+
+6. Semantic Retrieval
+When a user submits a query:
+1.	The query is embedded using the same model
+2.	FAISS retrieves the most relevant chunks
+3.	Retrieved chunks are passed to the answer generator
+This ensures retrieval is semantic, not keyword-based.
+7. Answer Generation & Grounding
+Instead of using an LLM, the system uses rule-based answer synthesis to ensure factual correctness:
+•	Filters narrative sentences only
+•	Excludes tables, charts, and projections
+•	Prioritizes:
+o	Year-specific mentions
+o	Numerical values
+o	Keywords from the question
+•	Produces:
+o	A concise answer
+o	Explicit page-level citations
+Example output:
+Real GDP growth declined from 4.2 percent in 2022 following the normalization after the FIFA World Cup.
+
+Sources: Page 9
+
+8. User Interface
+The UI is built with Streamlit and provides:
+•	PDF upload
+•	Real-time pipeline execution feedback
+•	Question input
+•	Answer display with citations
+The interface is intentionally simple and evaluation-friendly.
+
+9. Error Handling & Robustness
+•	Optional dependencies handled via try/except
+•	OCR failures do not break ingestion
+•	Streamlit widget keys prevent UI collisions
+•	Clear warnings instead of crashes
+
+10. Key Design Decisions
+Decision	Rationale
+Manual RAG	Full transparency and explainability
+FAISS	Fast, scalable similarity search
+No LLM	Avoid hallucinations; ensure grounding
+Rule-based QA	Precise factual answers
+Optional OCR	Platform-independent stability
+
+
+11. Limitations & Future Work
+Current Limitations
+•	Answer synthesis is extractive, not abstractive
+•	OCR skipped unless system dependencies installed
+Future Enhancements
+•	Add local LLM (Ollama) for abstractive answers
+•	Improve table-aware reasoning
+•	Add persistent vector storage
+•	Support multi-document retrieval
+
+12. Conclusion
+This project demonstrates a production-grade, fully explainable Manual RAG system capable of handling real-world documents and delivering grounded, citation-backed answers. The system prioritizes correctness, transparency, and robustness, making it suitable for enterprise and research use cases.
+
